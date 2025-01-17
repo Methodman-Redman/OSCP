@@ -1,4 +1,19 @@
 ```
+root@kali:~# seclists -h
+> seclists ~ Collection of multiple types of security lists
+/usr/share/seclists
+|-- Discovery
+|-- Fuzzing
+|-- IOCs
+|-- Miscellaneous
+|-- Passwords
+|-- Pattern-Matching
+|-- Payloads
+|-- Usernames
+`-- Web-Shells
+```
+
+```
 /usr/share/seclists/
 ├── Discovery
 │   ├── DNS
