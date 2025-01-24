@@ -1,0 +1,2 @@
+## GET
+`searchsploit -m {Number}`
