@@ -2,6 +2,7 @@
 #### ディレクトリの列挙
 `gobuster dir -u http://test.com -w /usr/share/wordlists/dirb/common.txt`  
 `gobuster dir -u http://example.com -w /usr/share/wordlists/dirb/common.txt -x php,html -t 20`
+`sudo gobuster dir -u http://10.10.10.56/ -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -o scan/dir_scan.txt`
 - dir: ディレクトリ列挙モード
 - u: 対象のURL
 - w: 使用するワードリスト
