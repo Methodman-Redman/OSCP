@@ -38,3 +38,6 @@ print("b にあって a にない要素:", diff_b_a)  # [6, 7]
 symmetric_diff = list(set(a) ^ set(b))
 print("どちらか一方にしかない要素:", symmetric_diff)  # [1, 2, 6, 7]
 ```
+
+![image](https://github.com/user-attachments/assets/b02de71f-c649-4501-98bd-11e1593a51de)
+
