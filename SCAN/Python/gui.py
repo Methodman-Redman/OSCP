@@ -1,3 +1,4 @@
+# ps aux | grep '[v]scode' | awk '{print $2}' | xargs kill -9
 import tkinter as tk
 from tkinter import ttk, filedialog
 import subprocess
