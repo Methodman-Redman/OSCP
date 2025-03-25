@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import subprocess
 import threading
 import os
@@ -46,6 +46,13 @@ def delete_memo():
     filename = f"memo_{datetime.datetime.now().strftime('%Y-%m-%d')}.txt"
     if os.path.exists(filename):
         os.remove(filename)
+
+def open_memo(memo_text):
+    file_path = filedialog.askopenfilename(title="Open Memo", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+    if file_path:
+        with open(file_path, "r", encoding="utf-8") as file:
+            memo_text.delete("1.0", tk.END)
+            memo_text.insert(tk.END, file.read())
 
 def create_tabbed_interface():
     root = tk.Tk()
@@ -95,6 +102,9 @@ def create_tabbed_interface():
     
     delete_button = ttk.Button(memo_button_frame, text="Delete", command=delete_memo)
     delete_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    open_button = ttk.Button(memo_button_frame, text="Open", command=lambda: open_memo(memo_text))
+    open_button.pack(side=tk.LEFT, padx=5, pady=5)
     
     root.mainloop()
 
