@@ -1,4 +1,3 @@
-# ps aux | grep '[v]scode' | awk '{print $2}' | xargs kill -9
 import tkinter as tk
 from tkinter import ttk, filedialog
 import subprocess
@@ -7,13 +6,16 @@ import os
 import signal
 import datetime
 
-def run_command(command, text_widget, process_list):
+def run_command(command, text_widget, process_list, highlight_condition=None):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True, preexec_fn=os.setsid)
     process_list.append(process)
     
     def update_output():
         for line in iter(process.stdout.readline, ''):
-            text_widget.insert(tk.END, line)
+            if highlight_condition and highlight_condition(line):
+                text_widget.insert(tk.END, line, "alert")
+            else:
+                text_widget.insert(tk.END, line)
             text_widget.see(tk.END)
         process.stdout.close()
     
@@ -26,12 +28,6 @@ def stop_processes(process_list):
         except ProcessLookupError:
             pass
     process_list.clear()
-
-def start_commands(ping_text, tail_text, ping_processes, tail_processes):
-    stop_processes(ping_processes)
-    stop_processes(tail_processes)
-    run_command("ping 127.0.0.1", ping_text, ping_processes)
-    run_command("tail -f test.txt", tail_text, tail_processes)
 
 def save_memo(memo_text):
     content = memo_text.get("1.0", tk.END).strip()
@@ -57,34 +53,10 @@ def open_memo(memo_text):
 
 def create_tabbed_interface():
     root = tk.Tk()
-    root.title("Ping & Tail Output")
+    root.title("System Monitor")
     
     notebook = ttk.Notebook(root)
     notebook.pack(expand=True, fill='both')
-    
-    # Main Tab
-    main_frame = ttk.Frame(notebook)
-    notebook.add(main_frame, text="Main")
-    
-    start_button = ttk.Button(main_frame, text="Start", command=lambda: start_commands(ping_text, tail_text, ping_processes, tail_processes))
-    start_button.pack(pady=10)
-    
-    stop_button = ttk.Button(main_frame, text="Stop", command=lambda: [stop_processes(ping_processes), stop_processes(tail_processes)])
-    stop_button.pack(pady=10)
-    
-    # Ping Tab
-    ping_frame = ttk.Frame(notebook)
-    notebook.add(ping_frame, text="Ping 127.0.0.1")
-    ping_text = tk.Text(ping_frame, wrap=tk.WORD)
-    ping_text.pack(expand=True, fill='both')
-    ping_processes = []
-    
-    # Tail Tab
-    tail_frame = ttk.Frame(notebook)
-    notebook.add(tail_frame, text="Tail test.txt")
-    tail_text = tk.Text(tail_frame, wrap=tk.WORD)
-    tail_text.pack(expand=True, fill='both')
-    tail_processes = []
     
     # Memo Tab
     memo_frame = ttk.Frame(notebook)
@@ -106,6 +78,55 @@ def create_tabbed_interface():
     
     open_button = ttk.Button(memo_button_frame, text="Open", command=lambda: open_memo(memo_text))
     open_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    # Tail -f /var/log/test.log Tab
+    tail_frame = ttk.Frame(notebook)
+    notebook.add(tail_frame, text="Tail /var/log/test.log")
+    tail_text = tk.Text(tail_frame, wrap=tk.WORD)
+    tail_text.pack(expand=True, fill='both')
+    tail_processes = []
+    
+    tail_button_frame = ttk.Frame(tail_frame)
+    tail_button_frame.pack(fill='x')
+    
+    start_tail_button = ttk.Button(tail_button_frame, text="Start", command=lambda: run_command("tail -f test.log", tail_text, tail_processes))
+    start_tail_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    stop_tail_button = ttk.Button(tail_button_frame, text="Stop", command=lambda: stop_processes(tail_processes))
+    stop_tail_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    # ls -l *.7z Tab
+    ls_frame = ttk.Frame(notebook)
+    notebook.add(ls_frame, text="ls -l *.7z")
+    ls_text = tk.Text(ls_frame, wrap=tk.WORD)
+    ls_text.pack(expand=True, fill='both')
+    ls_processes = []
+    
+    ls_button_frame = ttk.Frame(ls_frame)
+    ls_button_frame.pack(fill='x')
+    
+    start_ls_button = ttk.Button(ls_button_frame, text="Start", command=lambda: run_command("ls -l *.7z", ls_text, ls_processes))
+    start_ls_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    stop_ls_button = ttk.Button(ls_button_frame, text="Stop", command=lambda: stop_processes(ls_processes))
+    stop_ls_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    # df -h Tab
+    df_frame = ttk.Frame(notebook)
+    notebook.add(df_frame, text="df -h")
+    df_text = tk.Text(df_frame, wrap=tk.WORD)
+    df_text.pack(expand=True, fill='both')
+    df_text.tag_configure("alert", foreground="red")
+    df_processes = []
+    
+    df_button_frame = ttk.Frame(df_frame)
+    df_button_frame.pack(fill='x')
+    
+    start_df_button = ttk.Button(df_button_frame, text="Start",command=lambda: run_command("df -h", df_text, df_processes,lambda line: any(num.endswith('%') and num[:-1].isdigit() and int(num[:-1]) > 90 for num in line.split())))
+    start_df_button.pack(side=tk.LEFT, padx=5, pady=5)
+    
+    stop_df_button = ttk.Button(df_button_frame, text="Stop", command=lambda: stop_processes(df_processes))
+    stop_df_button.pack(side=tk.LEFT, padx=5, pady=5)
     
     root.mainloop()
 
