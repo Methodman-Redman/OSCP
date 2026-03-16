@@ -1,0 +1,145 @@
+- Ubuntu 22.04 / 24.04 LTS を想定した、Active Countermeasures方式での最短ルートを解説します。
+
+## 1. 構築手順（インストーラーの利用）
+- まずは「自動インストーラー」を使って環境を整えます。
+
+- リポジトリの取得と実行
+  - 公式のインストールスクリプトを取得して実行します。
+```
+git clone https://github.com/activecm/rita.git
+cd rita
+sudo ./install.sh
+```
+- ※このスクリプトにより、Zeek, MongoDB, RITA が一括でインストールされます。
+
+- パスの確認
+  - インストール後、一度ログアウトして再ログインするか、以下を実行して rita コマンドが叩けるか確認してください。
+```
+rita --version
+```
+#### 2. 解析手順（PCAP → Zeek → RITA）
+- PCAPファイルから脅威を見つけ出すまでの3ステップです。
+
+- Step 1: ZeekでPCAPをログ化する
+  - Zeekを使って、PCAP（バイナリ）を人間やRITAが読めるログ（テキスト）に変換します。
+
+```
+# 解析用のディレクトリを作成して移動
+mkdir analysis && cd analysis
+# Zeekを実行（-r でPCAPを指定）
+zeek -r /path/to/your/capture.pcap # localをつけるかも
+```
+- 生成物: conn.log, http.log, dns.log など、大量の .log ファイルが生成されます。
+  - local を付けることで、RITAが必要とするJSON形式やハッシュ値の計算が有効になります。
+
+## Step 2: RITAにログを取り込む（インポート）
+- Zeekが生成したログを、RITA（MongoDB）にインポートします。
+```
+# rita import [ログのディレクトリ] [データセット名]
+rita import . my_investigation
+```
+  - my_investigation は任意の名前に変えてください。
+
+#### Step 3: RITAで解析結果を表示する
+- ビーコニング（一定間隔の通信）など、不審な挙動をスコア順に表示します。
+```
+# ビーコニングの検出結果を表示
+rita show-beacons my_investigation
+```
+#### 3. 解析を効率化する Tips
+- 毎回コマンドを打つのが面倒な場合、以下のような流れで一気に処理するのが一般的です。
+- HTMLレポートの生成:
+  - ターミナル上での確認だけでなく、ブラウザで見れるレポートを作成できます。
+```
+rita generate-html my_investigation
+```
+# -> 'rita-html' ディレクトリに index.html が生成されます
+#### データのクリーンアップ:
+- 解析が終わってDBが不要になったら削除して容量を空けます。
+```
+rita delete my_investigation
+```
+
+## 追加？
+```
+PCAP
+ ↓
+Zeek
+  ├ JA3 (TLS fingerprint)
+  ├ JA4 (次世代TLS fingerprint)
+  ├ HASSH (SSH fingerprint)
+  └ Intel framework (IOC検知)
+ ↓
+RITA
+```
+- パス追加
+  - `echo 'export PATH=$PATH:/opt/zeek/bin' >> ~/.bashrc`
+  - `source ~/.bashrc`
+- 確認
+  - `zeek -v`
+#### 2 JA3 TLS fingerprint
+```
+cd /opt/zeek/share/zeek/site
+sudo git clone https://github.com/salesforce/ja3.git
+```
+#### Zeek設定
+- /opt/zeek/share/zeek/site/local.zeekに追加
+```
+@load ./ja3/ja3
+```
+- 生成ログ:ja3.log
+#### 3 JA4 fingerprint（新世代）
+- JA4はCloudflareが開発したJA3の後継
+```
+cd /opt/zeek/share/zeek/site
+sudo git clone https://github.com/FoxIO-LLC/ja4.git
+```
+- 設定
+  - local.zeek追加
+```
+@load ./ja4/ja4
+```
+- ログ:ja4.log
+4 HASSH (SSH fingerprint)
+- SSHベースC2検出に使えます。
+```
+cd /opt/zeek/share/zeek/site
+sudo git clone https://github.com/salesforce/hassh.git
+```
+- 設定local.zeek追加
+```
+@load ./hassh/hassh
+```
+- ログ:hassh.log
+#### 5 Zeek Intel Framework
+- これはIOC照合です。
+- 例
+  - malicious IP
+  - malicious domain
+  - JA3 hash
+- 設定local.zeek追加
+```
+@load frameworks/intel/seen
+@load frameworks/intel/do_notice
+```
+- IOCファイル
+  - /opt/zeek/share/zeek/site/intel/
+    - 例
+      ```
+      bad_domains.dat
+      bad_ips.dat
+      ```
+- フォーマット
+```
+#fields indicator indicator_type meta.source
+evil.com Intel::DOMAIN threatfeed
+1.2.3.4 Intel::ADDR threatfeed
+```
+- 生成ログ:intel.log
+
+#### ビーコン検出
+`rita show-beacons dataset1`
+#### DNSトンネル
+`rita show-dns dataset1`
+#### 長時間通信
+`rita show-long-connections dataset1`
