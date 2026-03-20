@@ -1,0 +1,38 @@
+## Update
+- download file
+```
+┌──(kali㉿kali)-[~]
+└─$ curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | \
+sudo gpg --dearmor -o /usr/share/keyrings/elastic-archive-keyring.gpg
+                                                                                                              
+┌──(kali㉿kali)-[~]
+└─$ 
+```
+- change sha1
+  - `sudo vi /etc/apt/sources.list.d/elastic.sources`
+```
+Types: deb
+URIs: https://artifacts.elastic.co/packages/8.x/apt
+Suites: stable
+Components: main
+Signed-By: /usr/share/keyrings/elastic-archive-keyring.gpg
+```
+
+## Docker install
+#### docker
+```
+sudo apt update
+sudo apt install -y docker.io
+```
+- Dockerを有効にして起動する：
+  - `sudo systemctl enable --now docker`
+- SudoなしでDockerを実行する
+  - `sudo usermod -aG docker $USER`
+- check
+  - `docker --version`
+#### compose
+- `sudo apt remove docker-buildx`
+- `sudo apt --fix-broken install`
+- `sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-buildx-plugin`
+- check
+  - `docker compose version`
