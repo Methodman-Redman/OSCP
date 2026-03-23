@@ -1,0 +1,68 @@
+## apt 
+- `sudo apt install arkime -y`
+## Set up
+- `sudo arkime-first-setup`
+  - eth0
+- 1. interface の質問
+  - Semicolon ';' seperated list of interfaces to monitor [eth1]
+  - 今表示されているインターフェース: br-4c643cf37c17;docker0;eth0;lo。
+    - たぶん eth0 だと思うので、こう入力して Enter: eth0
+      - Enter（デフォルトのeth1）でも致命的ではありません。後でconfig.iniの interface= を空にしたり、サービスを止めれば大丈夫です。
+- 2. Elasticsearch をローカルに入れるか
+  - Install Elasticsearch server locally for demo, must have at least 3G of memory, NOT recommended for production use (yes or no) [no]
+  - まだElasticsearch/OpenSearchを自分で入れていないなら、ここは:yes
+- KaliのVMにメモリ3GB以上割り当ててあるかだけ気にしてください。
+- 「Arkime - Configured - Now continue with step 4 in /opt/arkime/README.txt」のようなメッセージが出るはずです。
+- OpenSearch/Elasticsearch user [empty is no user] kali
+  - 「ArkimeがOpenSearch/Elasticsearchに接続するときのユーザー名」です。
+- 何も入れなければ「認証なしで接続を試す」、kali と入れればユーザー名kaliを使います。
+  - 今回のセットアップスクリプトは、ローカル用にOpenSearchを一緒に入れて、そこで使うユーザー名・パスワードをここで決めさせようとしている状態だと考えて大丈夫です。
+    - 手っ取り早くいくなら、そのまま kali のままで Enter でOKです（後で変えることもできます）。
+    - 「OpenSearchのユーザー kali / パスワード kali」という組み合わせを作るイメージです。
+- Password to encrypt S2S and other things, don't use spaces [must create one]
+  - これはOpenSearchとは別で、「Arkime内部でS2S通信やトークンの暗号化などに使う共通鍵」です。
+  - 空欄にはできないので、自分で新しいパスワード文字列を1つ決めて入力します（英数字記号OK・スペースはダメ）。
+    - 例: ArkimePcap2026! みたいなもの。
+    - 2回同じものを聞かれるのは「確認入力」です。1回目とまったく同じ文字列をもう一度入力してください。
+
+## 操作
+```
+# キャプチャを止める
+sudo systemctl stop arkimecapture
+
+# Web UI (viewer) を止める
+sudo systemctl stop arkimeviewer
+
+# access
+http://127.0.0.1:8005 
+```
+## test tcp
+- `sudo tcpdump -i eth0 -w test.pcap`
+
+## IEE oui.txt
+#### Download
+```
+cd /tmp
+
+# IEEE の OUI ファイルをダウンロード
+wget http://standards-oui.ieee.org/oui/oui.txt
+
+# Arkime が読む場所にコピー
+sudo mkdir -p /usr/lib/arkime/etc
+sudo mv oui.txt /usr/lib/arkime/etc/oui.txt
+sudo chmod a+r /usr/lib/arkime/etc/oui.txt
+```
+#### change 
+- 手順：oui.txt をシンプルな形に作り直す
+  - まず、IEEE の oui.txt を /tmp/oui-ieee-full.txt に保存して、そこから整理する形にします。
+    - `sudo cp /usr/lib/arkime/etc/oui.txt /tmp/oui-ieee-full.txt`
+    - `grep -E '^[0-9A-F]{2}-[0-9A-F]{2}-[0-9A-F]{2}' /tmp/oui-ieee-full.txt > /tmp/oui-simple.txt`
+- 重複を削除（hex と base 16 の重複）
+  - `sort /tmp/oui-simple.txt | uniq > /tmp/oui-final.txt`
+- Arkime の oui.txt に置き換える
+  - `sudo cp /tmp/oui-final.txt /usr/lib/arkime/etc/oui.txt`
+## capture を試す
+- `sudo /usr/lib/arkime/bin/capture -c /usr/lib/arkime/etc/config.ini -r ~/test.pcap`
+
+## Reset
+- `sudo /usr/lib/arkime/db/db.pl http://localhost:9200 wipe`
