@@ -1,0 +1,322 @@
+- Ready
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve
+ollama pull llama3
+ollama pull phi3
+pip install textual psutil requests
+- main.py
+```
+# AI Agent Kali TUI Prototype (Stable Full Version)
+
+import asyncio
+import subprocess
+import psutil
+import requests
+import time
+
+from textual.app import App, ComposeResult
+from textual.widgets import Static, Input, RichLog
+from textual.containers import Grid
+
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
+MODEL = "phi3"
+
+
+# -----------------------------
+# LLM CALL（安定版）
+# -----------------------------
+def ask_ollama(prompt: str) -> str:
+    payload = {
+        "model": MODEL,
+        "prompt": prompt,
+        "stream": False
+    }
+
+    for _ in range(2):  # ← リトライ1回
+        try:
+            response = requests.post(
+                OLLAMA_URL,
+                json=payload,
+                timeout=60
+            )
+            response.raise_for_status()
+            return response.json().get("response") or "Empty response"
+
+        except requests.exceptions.RequestException:
+            time.sleep(1)
+
+    return "Connection error with Ollama"
+
+# -----------------------------
+# PROMPTS
+# -----------------------------
+def build_mitre_prompt(cmd: str) -> str:
+    return f"""
+You are a cybersecurity expert.
+Map this command to MITRE ATT&CK.
+
+Return ONLY:
+Tactic:
+Technique:
+ID:
+
+Command:
+{cmd}
+"""
+
+
+def build_recommend_prompt(cmd, out, err):
+    return f"""
+You are a professional penetration tester.
+
+Command:
+{cmd}
+
+Output:
+{out[:2000]}
+
+Error:
+{err[:2000]}
+
+Tasks:
+1. If error exists → explain cause and fix
+2. Suggest next commands
+3. Keep concise
+"""
+
+
+# -----------------------------
+# COMMAND EXECUTION
+# -----------------------------
+def run_command(cmd: str):
+    try:
+        result = subprocess.run(
+            cmd,
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        return result.stdout, result.stderr
+    except Exception as e:
+        return "", str(e)
+
+
+# -----------------------------
+# PANELS
+# -----------------------------
+class MITREPanel(Static):
+    def on_mount(self):
+        self.border_title = "1: MITRE ATT&CK"
+
+    def update_content(self, text):
+        self.update(text if text else "No result")
+
+
+class StatusPanel(Static):
+    def on_mount(self):
+        self.border_title = "2: Agent Status"
+        self.set_interval(1, self.update_status)
+
+    def update_status(self):
+        cpu = psutil.cpu_percent()
+        mem = psutil.virtual_memory().percent
+        self.update(f"CPU: {cpu}%\nMEM: {mem}%\nModel: {MODEL}")
+
+
+class TerminalPanel(RichLog):
+    def on_mount(self):
+        self.border_title = "3: Terminal"
+        self.markup = True
+
+
+class RecommendPanel(Static):
+    def on_mount(self):
+        self.border_title = "4: AI Recommendation"
+
+    def update_content(self, text):
+        self.update(text if text else "No recommendation")
+
+
+# -----------------------------
+# MAIN APP
+# -----------------------------
+class AgentApp(App):
+
+    CSS = """
+    Grid {
+        grid-size: 2 2;
+        grid-gutter: 1;
+    }
+    Input {
+        dock: bottom;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        self.mitre = MITREPanel()
+        self.status = StatusPanel()
+        self.terminal = TerminalPanel()
+        self.recommend = RecommendPanel()
+        self.input = Input(placeholder="Enter command...")
+
+        yield Grid(
+            self.mitre,
+            self.status,
+            self.terminal,
+            self.recommend
+        )
+        yield self.input
+
+    async def on_input_submitted(self, event: Input.Submitted):
+        cmd = event.value.strip()
+        self.input.value = ""
+
+        if not cmd:
+            return
+
+        # --- Terminal表示 ---
+        self.terminal.write(f"[bold green]$ {cmd}[/bold green]")
+
+        # --- コマンド実行（非同期） ---
+        stdout, stderr = await asyncio.to_thread(run_command, cmd)
+
+        if stdout:
+            self.terminal.write(stdout)
+        if stderr:
+            self.terminal.write(f"[red]{stderr}[/red]")
+
+        # --- AI処理（バックグラウンド） ---
+        self.run_worker(
+            self.process_ai_analysis(cmd, stdout, stderr),
+            thread=True
+        )
+
+    async def process_ai_analysis(self, cmd, stdout, stderr):
+        mitre_prompt = build_mitre_prompt(cmd)
+        rec_prompt = build_recommend_prompt(cmd, stdout, stderr)
+
+        # ★ スレッド内なので直接呼ぶ（重要）
+        mitre_res = ask_ollama(mitre_prompt)
+
+        time.sleep(0.5)
+        rec_res = ask_ollama(rec_prompt)
+
+        # --- UI更新（安全） ---
+        self.call_from_thread(
+            self.mitre.update_content,
+            mitre_res if mitre_res else "MITRE: no response"
+        )
+
+        self.call_from_thread(
+            self.recommend.update_content,
+            rec_res if rec_res else "Recommendation: no response"
+        )
+
+
+# -----------------------------
+# ENTRY
+# -----------------------------
+if __name__ == "__main__":
+    AgentApp().run()
+```
+- main2.py
+```
+#!/usr/bin/env python3
+# Kali AI Agent TUI - 最終完全版
+import asyncio
+import subprocess
+import psutil
+import requests
+import json
+import threading
+from queue import Queue
+
+from textual.app import App,on
+from textual.widgets import Static,Input,RichLog
+from textual.containers import Grid
+
+OLLAMA_URL="http://127.0.0.1:11434/api/generate"
+MODEL="phi3"
+
+ollama_queue=Queue()
+threading.Thread(target=lambda: [stream_ollama(*ollama_queue.get())or ollama_queue.task_done() for _ in iter(int,1)],daemon=True).start()
+
+def stream_ollama(prompt,callback):
+ try:
+  with requests.post(OLLAMA_URL,json={"model":MODEL,"prompt":prompt,"stream":True},stream=True,timeout=60)as r:
+   for line in r.iter_lines():
+    if line:
+     data=json.loads(line)
+     if chunk:=data.get("response"):callback(chunk)
+     if data.get("done"):callback("[DONE]");break
+ except:callback("[ERROR]")
+
+def run_command(cmd):
+ try:
+  result=subprocess.run(cmd,shell=True,capture_output=True,text=True,timeout=20)
+  return result.stdout,result.stderr
+ except:return"","Timeout"
+
+def build_prompt(cmd,out,err):
+ return f"""KaliペンテストAI
+
+コマンド: {cmd}
+出力量: {out[:300]}
+エラー: {err[:300]}
+
+[MITRE]
+タクティクス:Discovery
+テクニック:T1033
+説明:ユーザー情報収集
+
+[RECOMMEND]
+1.nmap -sV localhost
+2.netstat -tuln
+3.ps aux
+
+形式厳守で答えて"""
+
+class KaliApp(App):
+ CSS="""
+ #grid{grid-size:2 2;grid-gutter:1;height:1fr;}
+ .mitre{border:heavy green;}
+ .status{border:heavy blue;}
+ .term{border:heavy yellow;height:1fr;}
+ .rec{border:heavy magenta;height:1fr;}
+ #input{dock:bottom;height:3;width:1fr;margin:1;}
+ """
+ def compose(self):
+  yield Grid(Static("1:MITRE",classes="mitre"),Static("2:Status",classes="status"),RichLog(classes="term"),RichLog(classes="rec"),id="grid")
+  yield Input(id="input",placeholder="コマンド→Enter")
+
+ def on_mount(self):
+  self.query_one("#input").focus()
+  self.set_interval(2,self.status_update)
+
+ def status_update(self):
+  try:
+   s=self.query_one(".status")
+   s.update(f"CPU:{psutil.cpu_percent():.0f}% MEM:{psutil.virtual_memory().percent:.0f}%")
+  except:pass
+
+ @on(Input.Submitted,"#input")
+ async def cmd(self,e):
+  cmd=e.input.value.strip();e.input.value=""
+  if not cmd:return
+  t=self.query_one(".term");m=self.query_one(".mitre");r=self.query_one(".rec")
+  t.write(f"[green]$ {cmd}[/]")
+  o,e=await asyncio.to_thread(run_command,cmd)
+  t.write(o or f"[red]{e}[/]")
+  m.update("分析中");r.clear()
+  self.mitre,self.rec,self.mode=True,"",""
+  def cb(c):self.call_from_thread(self.chunk,c)
+  ollama_queue.put((build_prompt(cmd,o,e),cb))
+
+ def chunk(self,c):
+  if "[MITRE]"in c:self.mode=self.mitre_buf=""
+  elif"[RECOMMEND]"in c:self.mode=False;self.rec_buf=""
+  if self.mode:self.mitre_buf+=c;self.query_one(".mitre").update(self.mitre_buf)
+  else:self.rec_buf+=c;self.query_one(".rec").write(self.rec_buf)
+
+if __name__=="__main__":KaliApp().run()
+```
