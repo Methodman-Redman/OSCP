@@ -1,0 +1,11 @@
+## capa
+- Download
+  - `https://github.com/mandiant/capa/releases/tag/v9.3.1`
+- execute
+  - `./capa -v ~/Stowaway/linux_x64_agent`
+## strace
+- install
+  - `sudo apt install strace`
+- execute
+  - Stop NW interface
+  - `strace -f -e trace=network ./DISASTROUS_QUANTITY`
