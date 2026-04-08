@@ -1,0 +1,65 @@
+## Ready to ollama
+```
+export OLLAMA_HOST=0.0.0.0
+ollama serve
+ollama pull codellama
+ollama pull deepseek-coder
+```
+- check
+```
+ss -tulnp | grep 11434
+pkill ollama
+sudo systemctl stop ollama
+```
+- `curl http://localhost:11434/api/tags`
+
+## Ready to Remunx
+```
+mkdir remnux-ai
+cd remnux-ai
+mkdir malware_samples
+mv mal ./malware_samples/
+vi docker-compose.yml
+```
+
+```
+version: "3.9"
+
+services:
+  remnux:
+    image: remnux/remnux-distro:noble
+    container_name: remnux_ai
+    stdin_open: true
+    tty: true
+    privileged: true
+
+    # 解析ファイル共有
+    volumes:
+      - ./malware_samples:/home/remnux/files/samples
+
+    # ホスト（Kali）のOllamaへアクセスするため
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # 環境変数
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+
+    # セキュリティ的に必要ならコメント外す
+    # network_mode: "none"
+
+    restart: unless-stopped
+```
+or
+
+```
+extra_hosts:
+  - "host.docker.internal:172.17.0.1"
+```
+
+- `docker compose up -d`
+- `docker exec -it remnux_ai bash`
+- `curl http://host.docker.internal:11434/api/tags`
+- `opencode`
+- `http://host.docker.internal:11434`
+- `strings /home/remnux/files/samples/sample.exe`
