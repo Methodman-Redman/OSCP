@@ -4,6 +4,7 @@ export OLLAMA_HOST=0.0.0.0
 ollama serve
 ollama pull codellama
 ollama pull deepseek-coder
+ollama pull qwen3-coder
 ```
 - check
 ```
@@ -63,3 +64,23 @@ extra_hosts:
 - `opencode`
 - `http://host.docker.internal:11434`
 - `strings /home/remnux/files/samples/sample.exe`
+
+
+## more
+```
+mkdir -p ~/.config/opencode/
+cat <<EOF > ~/.config/opencode/opencode.json
+{
+  "providers": {
+    "ollama": {
+      "baseUrl": "http://host.docker.internal:11434/v1",
+      "apiKey": "ollama",
+      "models": {
+        "default": "qwen3-coder"
+      }
+    }
+  },
+  "activeProvider": "ollama"
+}
+EOF
+```
