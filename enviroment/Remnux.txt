@@ -69,18 +69,26 @@ extra_hosts:
 ## more
 ```
 mkdir -p ~/.config/opencode/
-cat <<EOF > ~/.config/opencode/opencode.json
+cat <<EOF > .config/opencode/opencode.json
 {
-  "providers": {
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/deepseek-coder",
+  "provider": {
     "ollama": {
-      "baseUrl": "http://host.docker.internal:11434/v1",
-      "apiKey": "ollama",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://host.docker.internal:11434/v1"
+      },
       "models": {
-        "default": "qwen3-coder"
+        "deepseek-coder": {
+          "name": "deepseek-coder:latest"
+        },
+        "deepseek-coder-1b": {
+          "name": "deepseek-coder:1.3b"
+        }
       }
     }
-  },
-  "activeProvider": "ollama"
+  }
 }
 EOF
 ```
