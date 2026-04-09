@@ -93,3 +93,131 @@ cat <<EOF > /root/.config/opencode/opencode.json
 }
 EOF
 ```
+
+```
+┌──(kali㉿kali)-[~]
+└─$ node --version                                         
+v20.18.3
+                                                                                                                                                    
+┌──(kali㉿kali)-[~]
+└─$ go version              
+go version go1.24.2 linux/amd64
+                                                                                                                                                    
+┌──(kali㉿kali)-[~]
+└─$ curl -fsSL https://opencode.ai/install | bash
+
+Installing opencode version: 1.4.1
+■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 100%
+Successfully added opencode to $PATH in /home/kali/.zshrc
+
+                                 ▄     
+█▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+█░░█ █░░█ █▀▀▀ █░░█ █░░░ █░░█ █░░█ █▀▀▀
+▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+
+OpenCode includes free models, to start:
+
+cd <project>  # Open directory
+opencode      # Run command
+
+For more information visit https://opencode.ai/docs
+
+
+                                                                                                                                                    
+┌──(kali㉿kali)-[~]
+└─$ cd acd-test                                  
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ opencode                         
+Command 'opencode' not found, did you mean:
+  command 'pencode' from deb golang-github-ffuf-pencode-dev
+Try: sudo apt install <deb name>
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ opencode --version
+Command 'opencode' not found, did you mean:
+  command 'pencode' from deb golang-github-ffuf-pencode-dev
+Try: sudo apt install <deb name>
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/acd-test]
+└─$ find / -iname "opencode" 2>/dev/null
+/home/kali/.opencode/bin/opencode
+^C
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ /home/kali/.opencode/bin/opencode   
+Performing one time database migration, may take a few minutes...
+Database migration complete.
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ sudo ln -s /home/kali/.opencode/bin/opencode /usr/local/bin/opencode
+[sudo] password for kali: 
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ opencode --version
+1.4.1
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ ollama launch opencode
+
+Launching OpenCode with deepseek-coder...
+                                   ▄     
+  █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+  █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+  ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+  Session   New session - 2026-04-09T12:37:26.825Z
+  Continue  opencode -s ses_28dc0a957ffeCxNt7C9XSZOhro
+
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ ollama launch opencode
+This will modify your OpenCode configuration:
+  /home/kali/.config/opencode/opencode.json
+  /home/kali/.local/state/opencode/model.json
+Backups will be saved to /tmp/ollama-backups/
+
+
+Launching OpenCode with llama3...
+                                   ▄     
+  █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+  █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+  ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+  Session   New session - 2026-04-09T12:38:03.980Z
+  Continue  opencode -s ses_28dc01833ffe00zrfmmjCx0j0Z
+
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ ollama launch opencode
+
+pulling manifest 
+pulling dec52a44569a: 100% ▕███████████████████████████████████████████████████████████████████████████████████████▏ 6.6 GB                         
+pulling 7339fa418c9a: 100% ▕███████████████████████████████████████████████████████████████████████████████████████▏  11 KB                         
+pulling 9371364b27a5: 100% ▕███████████████████████████████████████████████████████████████████████████████████████▏   65 B                         
+pulling be595b49fe22: 100% ▕███████████████████████████████████████████████████████████████████████████████████████▏  475 B                         
+verifying sha256 digest 
+writing manifest 
+success 
+This will modify your OpenCode configuration:
+  /home/kali/.config/opencode/opencode.json
+  /home/kali/.local/state/opencode/model.json
+Backups will be saved to /tmp/ollama-backups/
+
+
+Launching OpenCode with qwen3.5...
+                                   ▄     
+  █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+  █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+  ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+  Session   New session - 2026-04-09T12:42:23.331Z
+  Continue  opencode -s ses_28dbc231cffeg4Sw4IISeoCb42
+
+                                                                                                                                                     
+┌──(kali㉿kali)-[~/acd-test]
+└─$ 
+
+```
