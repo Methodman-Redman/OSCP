@@ -1,0 +1,22 @@
+- yml1
+```
+  grafana:
+    image: vulhub/grafana:11.0.0
+    network_mode: host
+```
+- yml2
+```
+networks:
+  mynet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
+
+services:
+  grafana:
+    image: vulhub/grafana:11.0.0
+    networks:
+      - mynet
+```
