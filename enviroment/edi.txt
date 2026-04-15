@@ -1,0 +1,1 @@
+sudo docker run -d --name netdata-cve -p 19999:19999 netdata/netdata:v1.45.0
