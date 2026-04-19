@@ -1,0 +1,11 @@
+# 1 Dynamic PortFoward
+## kali
+./gost -L quic://user:pass@:443
+## Ubuntu
+./gost -L socks5://:1080 -F quic://user:pass@192.168.31.154:443
+/etc/proxychains.conf
+proxychains nmap -Pn -sT -p 22 10.129.238.52
+
+# 1 + tcp RS foward
+## kali
+./gost -L quic://user:pass@:443 -L tcp://:80/192.168.31.157:80
