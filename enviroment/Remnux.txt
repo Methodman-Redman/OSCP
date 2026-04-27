@@ -126,40 +126,40 @@ For more information visit https://opencode.ai/docs
 
                                                                                                                                                     
 ┌──(kali㉿kali)-[~]
-└─$ cd acd-test                                  
+└─$ cd ai-test                                  
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ opencode                         
 Command 'opencode' not found, did you mean:
   command 'pencode' from deb golang-github-ffuf-pencode-dev
 Try: sudo apt install <deb name>
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ opencode --version
 Command 'opencode' not found, did you mean:
   command 'pencode' from deb golang-github-ffuf-pencode-dev
 Try: sudo apt install <deb name>
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ find / -iname "opencode" 2>/dev/null
 /home/kali/.opencode/bin/opencode
 ^C
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ /home/kali/.opencode/bin/opencode   
 Performing one time database migration, may take a few minutes...
 Database migration complete.
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ sudo ln -s /home/kali/.opencode/bin/opencode /usr/local/bin/opencode
 [sudo] password for kali: 
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ opencode --version
 1.4.1
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ ollama launch opencode
 
 Launching OpenCode with deepseek-coder...
@@ -172,7 +172,7 @@ Launching OpenCode with deepseek-coder...
   Continue  opencode -s ses_28dc0a957ffeCxNt7C9XSZOhro
 
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ ollama launch opencode
 This will modify your OpenCode configuration:
   /home/kali/.config/opencode/opencode.json
@@ -190,7 +190,7 @@ Launching OpenCode with llama3...
   Continue  opencode -s ses_28dc01833ffe00zrfmmjCx0j0Z
 
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ ollama launch opencode
 
 pulling manifest 
@@ -217,7 +217,7 @@ Launching OpenCode with qwen3.5...
   Continue  opencode -s ses_28dbc231cffeg4Sw4IISeoCb42
 
                                                                                                                                                      
-┌──(kali㉿kali)-[~/acd-test]
+┌──(kali㉿kali)-[~/ai-test]
 └─$ 
 
 ```
