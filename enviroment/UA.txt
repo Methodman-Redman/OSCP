@@ -1,0 +1,31 @@
+# 共通のUser-Agent定義
+export AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+
+# 各ツールのエイリアス（User-Agent指定を自動付加）
+alias curl='curl -A "$AGENT"'
+alias feroxbuster='feroxbuster -a "$AGENT"'
+alias wget='wget --user-agent="$AGENT"'
+alias sqlmap='sqlmap --user-agent="$AGENT"'
+alias gobuster='gobuster dir --useragent "$AGENT"'
+alias ffuf='ffuf -H "User-Agent: $AGENT"'
+alias nuclei='nuclei -H "$AGENT"'
+alias wpscan='wpscan --user-agent "$AGENT"'
+
+# nmap の場合はスクリプト（http-*）等に影響させるための引数指定
+# -E オプション: 現在のユーザーの環境変数を保持したまま sudo を実行
+alias nmap='sudo -E nmap --script-args http.useragent="$AGENT"'
+
+source ~/.bashrc  # または ~/.zshrc
+
+点検用スクリプト
+```
+from http.server import HTTPServer, BaseHTTPRequestHandler
+class LogHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        print("\n--- Incoming Request Headers ---")
+        print(self.headers)
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+HTTPServer(('', 80), LogHandler).serve_forever()
+```
