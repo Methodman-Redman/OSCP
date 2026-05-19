@@ -1,0 +1,56 @@
+d-link DCS-935L firmware
+https://support.dlink.com.au/Download/download.aspx?product=DCS-935L
+wget https://files.dlink.com.au/products/DCS-935L/REV_A/Firmware/DCS-935L_FW_1.06.02/DCS-935L_A1_FW_1.06.02_20150717_r3108.bin
+file
+strings -10 test.bin less
+LZMA : Linuxファイルの圧縮アルゴリズム
+
+binwalk test.bin
+	lzma
+	squashfs:読み取り専用Linux圧縮ファイルシステム　揮発性
+	
+## squashfs取り出し
+dd if=test.bin skip=1431586 bs=1 of=dlink.sqsh
+
+## ファイルシステム抽出
+sudo unsquashfs dlink.sqsh
+	output squashfs-root
+
+## アーキテクチャの確認
+file bin/busybox
+	output 32bit-Mipsアーキテクチャ
+## エミュレーション
+qemu-mips-static bin/busybox
+ls bin/
+
+## ハードコートされた認証情報の確認
+ls -la etc/passwd
+ls /mnt.flash/config/
+cat etc/passwd_default
+cat /etc/inittab (システムの初期化時に実行される梅安理とスクリプト)
+cat etc/rc.d/rcS
+
+## マウント root化
+sudo mount --bind /proc /home/ubuntu/iotVid/squashfs-root/proc
+sudo mount --bind /dev /home/ubuntu/iotVid/squashfs-root/dev
+sudo mount --bind /sys /home/ubuntu/iotVid/squashfs-root/sys
+sudo chroot . /bin/sh
+
+## 実行
+etc/rc.d/rcS
+
+## プロセス確認
+netstat -tln
+
+## アクセス
+https://localhsot
+	admin
+	no password
+	
+
+
+
+
+
+## qemu
+apt search qemu-static
